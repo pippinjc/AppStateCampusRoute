@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>App State Everday Stops</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background: whitesmoke;
+			font-family: "Tahoma", sans-serif;
+			color: #3d3d3d;
+		}
+
+	h1 {
+			position: absolute;
+			margin-top: 10;
+			top: 10px;
+			left: 50px;
+			font-size: 2em;
+			font-family: "Georgia", serif;
+			letter-spacing: .04em;
+			padding: 10px 15px;
+			background: rgba(256, 256, 256);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		h2 {
+			font-family: "Georgia", serif;
+			letter-spacing: .04em;
+		}
+		#map {
+	position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		section {
+			position: absolute;
+			bottom: 0;
+			left: 10px;
+			width: 280px;
+			margin: 20px auto;
+			padding: 0 15px;
+			background: rgba(256, 256, 256);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		p {
+			font-size: .9em;
+			line-height: 1.5em;
+		}
+
+		a {
+			color: #aa9100;
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>My everyday stops on App State Campus.</h1>
+
+
+
+	<div id='map'></div>
+
+	<section>
+		<h2>About my everyday route.</h2>
+
+		<p>These are the places that I stop in during my time on-campus. Each stop is represented by the Appalachian State
+			logo, and my walking route by the dashed line. Hover over the Appalachian logo for the building name and a brief
+			description of it's place in my routine!
+		</p>
+
+	
+
+		<p>Explore more about my school, Appalachian State<a href="https://www.appstate.edu"> at this link!</a></p>
+		<p><b>Map authored by: Chandler Pippin</b></p>
+
+	</section>
+
+	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+
+    <script src="data/route.js"></script> <!-- our data is loaded here-->
+
+
+	<script>
+
+console.log(data);
+
+//options to be used when creating the map
+		var options = {
+		center: [36.215609, -81.690389],
+		zoom: 16	
+	}
+
+//creation of the Leaflet map
+		var map = L.map('map', options);
+
+//request to load basemap
+var CartoDB_Voyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+}).addTo(map);
+//create a custom line feature for our route.
+var myRoute = L.geoJson(data, {
+    filter: function(feature){
+        if(feature.geometry.type == "LineString"){
+            return feature;
+        }
+    }, 
+
+    style: function(feature){
+        return{
+            color:"#8795a2",
+            weight: 6,
+            opacity: 0.8,
+            dashArray: "10, 10",
+        }
+    }
+
+}).addTo(map);
+
+var appLogoIcon = L.icon({
+    iconUrl: 'img/applogo.png',
+    
+    iconSize: [40, 40],      
+    iconAnchor: [15, 40],      
+    popupAnchor: [0, -35],     
+    
+});
+
+
+
+var myStops = L.geoJson(data, {
+    filter: function(feature) {
+        if(feature.geometry.type == "Point") {
+            return feature;
+        }
+    },
+
+    pointToLayer: function (feature, latlng) {
+       
+        return L.marker(latlng, { icon: appLogoIcon });
+    },
+
+    onEachFeature: function(feature, layer){
+   
+        layer.bindTooltip(`<h2>${feature.properties.name}</h2>
+		<p>${feature.properties.desc}</p>`);
+    },
+}).addTo(map);
+
+//var myStops = L.geoJson(data, {
+  //  filter: function(feature) {
+    //    if(feature.geometry.type == "Point") {
+      //      return feature;
+        //}
+ //   },
+
+//	style: function(feature){
+//		return{
+//			color: "#748ca2",
+//		}
+//	},
+  //  onEachFeature: function(feature, layer){
+    //    layer.bindTooltip(feature.properties ['name']);
+  //  },
+//}).addTo(map);
+
+map.fitBounds(myRoute.getBounds(), {
+	paddingBottomRight: [0,-50],
+});
+//string content to be inserted into a tooltip
+//		var message = 'Beacon Heights!';
+
+
+
+	</script>
+
+</body>
+
+</html>
